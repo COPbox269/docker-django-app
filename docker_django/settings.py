@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-z*43d5$1fy!w4^*ydbprd^tgt_43^f+v-)*_bb0-ynvt6hxn&s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["0.0.0.0", "localhost"]
+ALLOWED_HOSTS = ["0.0.0.0", "localhost", "127.0.0.1"]
 
 
 # Application definition
@@ -38,6 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_results',
+    
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -84,6 +87,13 @@ DATABASES = {
         'PORT': 5432,
     }
 }
+
+# Celery declearation
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER", "redis://redis:6379/0")
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
 
 
 # Password validation

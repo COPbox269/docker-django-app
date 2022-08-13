@@ -9,9 +9,34 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+  cache:
+    image: redis:alpine
+    container_name: redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+    restart: always
+  celery:
+    build: .
+    container_name: celery
+    command: celery -A app worker -l info
+    volumes:
+      - .:/code
+    depends_on:
+      - web
+      - cache
+      - db
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: bash -c "python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/code
     ports:
@@ -21,4 +46,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy

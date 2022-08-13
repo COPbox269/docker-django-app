@@ -18,6 +18,11 @@ WORKDIR /code
 # Install any needed packages specified in requirements.txt
 COPY requirements.txt /code/
 
+RUN apt-get update \
+    && apt-get -y install libpq-dev gcc
+
+RUN pip install --upgrade pip
+
 RUN pip3 install -r requirements.txt
 
 COPY . /code/
